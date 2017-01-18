@@ -2,7 +2,7 @@
 Imageviewer component built with react
 
 ## Demo
-You can find demo in folder [example](https://github.com/Caesor/react-imageview/examples)
+You can find demo in folder [examples](https://github.com/Caesor/react-imageview/examples) or [demo](https://caesor.github.io/react-imageview/examples/)
 
 ## Usage with React
 
