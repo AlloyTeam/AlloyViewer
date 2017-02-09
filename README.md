@@ -11,7 +11,7 @@
 * 图片懒加载、预加载
 
 ## 示例
-您可以在[这里](https://github.com/Caesor/react-imageview/examples)找到例子或者[在线示例](https://caesor.github.io/react-imageview/examples/)
+您可以下载代码在examples文件夹中找到例子或者[在线示例](https://alloyteam.github.io/AlloyViewer/examples/)
 
 ## 使用方法
 
@@ -82,7 +82,7 @@ SingleImgView.show({
 Imageview component built with react
 
 ## Demo
-You can find demo in [folder](https://github.com/Caesor/react-imageview/examples) or [demo online](https://caesor.github.io/react-imageview/examples/)
+You can download the code and find demo in folder which is named as examples or [demo online](https://alloyteam.github.io/AlloyViewer/examples/)
 
 ## Usage with React
 
