@@ -1,7 +1,14 @@
 ## 中文 | [English](#user-content-english--中文)
 
 ## React图片查看器
-使用React打造的图片查看器
+使用React打造的H5图片查看器
+
+## 特性
+* 各类手势快速响应
+* 急速滑动翻页
+* 支持双指缩放、旋转、双击放大
+* 支持放大后局部拖拽、翻页
+* 图片懒加载、预加载
 
 ## 示例
 您可以在[这里](https://github.com/Caesor/react-imageview/examples)找到例子或者[在线示例](https://caesor.github.io/react-imageview/examples/)
