@@ -60,10 +60,9 @@ class ImageView extends Component {
         return (
             <div className="imageview">
                 <AlloyFinger
-                    onSingleTap={this.onSingleTap.bind(this)}
                     onPressMove={this.onPressMove.bind(this)}
                     onSwipe={this.onSwipe.bind(this)}>
-                    <ul id="imagelist" ref="imagelist" className="imagelist">
+                    <ul onClick={this.onSingleTap.bind(this)} ref="imagelist" className="imagelist">
                     {
                         this.props.imagelist.map((item, i) => {
                             return (
@@ -123,20 +122,6 @@ class ImageView extends Component {
         evt.preventDefault();
     }
 
-    onPicPressMove(evt) {
-        this.endAnimation();
-
-        const { deltaX, deltaY } = evt;
-
-        if(this.ob && this.checkInArea(deltaX, deltaY)){
-            this.ob.translateX += deltaX;
-            this.ob.translateY += deltaY;
-            this.focused = true;
-        }else {
-            this.focused = false;
-        }
-    }
-
     onSwipe(evt){
         const { direction } = evt;
 
@@ -155,8 +140,23 @@ class ImageView extends Component {
         this.changeIndex(current)
     }
 
+    onPicPressMove(evt) {
+        if(this.ob.scaleX <= 1 || evt.touches.length > 1){
+            return;
+        }
+
+        const { deltaX, deltaY } = evt;
+
+        if(this.ob && this.checkInArea(deltaX, deltaY)){
+            this.ob.translateX += deltaX;
+            this.ob.translateY += deltaY;
+            this.focused = true;
+        }else {
+            this.focused = false;
+        }
+    }
+
     onMultipointStart(){
-        // this.endAnimation();
         this.initScale = this.ob.scaleX;
     }
 
@@ -164,16 +164,28 @@ class ImageView extends Component {
         if( this.props.disablePinch ){
             return false;
         }
+        this.ob.style.webkitTransition = 'cubic-bezier(.25,.01,.25,1)'
+
+        const { originX, originY } = this.ob, 
+            originX2 = evt.center.x - this.screenWidth/2 - document.body.scrollLeft,
+            originY2 = evt.center.y - this.screenHeight/2 - document.body.scrollTop;
+
+        this.ob.originX = originX2;
+        this.ob.originY = originY2;
+        this.ob.translateX = this.ob.translateX + (originX2 - originX) * this.ob.scaleX;
+        this.ob.translateY = this.ob.translateY + (originY2 - originY) * this.ob.scaleY;
+
         this.ob.scaleX = this.ob.scaleY = this.initScale * evt.scale;
-        this.ob.style.webkitTransition = 'cubic-bezier(.15,.01,.88,1)'
     }
 
     onRotate(evt){
         if( this.props.disableRotate ){
             return false;
         }
+        
+        this.ob.style.webkitTransition = 'cubic-bezier(.25,.01,.25,1)'
+
         this.ob.rotateZ += evt.angle;
-        this.ob.style.webkitTransition = 'cubic-bezier(.15,.01,.88,1)'
     }
 
     onLongTap(){
@@ -188,9 +200,11 @@ class ImageView extends Component {
             return;
         }
 
+        this.ob.style.webkitTransition = '300ms ease';
+
         // scale to normal
         if (this.ob.scaleX < 1) {
-            this.setScale(1);
+            this.restore(false);
         }
         if (this.ob.scaleX > 2) {
             this.setScale(2);
@@ -258,9 +272,9 @@ class ImageView extends Component {
         this.ob.scaleX = this.ob.scaleY = size;
     }
 
-    restore() {
+    restore(rotate=true) {
         this.ob.translateX = this.ob.translateY = 0;
-        this.ob.rotateZ = 0;
+        !!rotate && (this.ob.rotateZ = 0);
         this.ob.scaleX = this.ob.scaleY = 1;
         this.ob.originX = this.ob.originY = 0;
     }

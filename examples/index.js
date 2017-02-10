@@ -4,10 +4,12 @@ import { SingleImgView } from './src/index.js'
 // import ImageView from 'react-imageview'
 
 // import 'react-imageview/dist/react-imageview.css'
+import Mlogger from '@tencent/mlogger'
 
 class Main extends Component {
     constructor(){
         super();
+        Mlogger.init({});
     }
 
     render() {

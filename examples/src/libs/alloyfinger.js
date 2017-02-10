@@ -112,6 +112,10 @@ export default class AlloyFinger extends Component {
             var v = { x: evt.touches[1].pageX - currentX, y: evt.touches[1].pageY - currentY };
             if (preV.x !== null) {
                 if (this.pinchStartLen > 0) {
+                    evt.center = {
+                        x: (evt.touches[1].pageX + currentX) / 2, 
+                        y: (evt.touches[1].pageY + currentY) / 2
+                    };
                     evt.scale = this.getLen(v) / this.pinchStartLen;
                     this._emitEvent('onPinch', evt);
                 }
