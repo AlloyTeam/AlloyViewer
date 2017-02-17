@@ -41,7 +41,9 @@ class Main extends Component {
         SingleImgView.show({
             imagelist,
             current,
-            close: ()=>{SingleImgView.hide()}
+            close: ()=>{SingleImgView.hide()},
+            disablePageNum: true,
+            desc: '<div id="J_desc" style="position:absolute;bottom:0;left:0;right:0;">分的书法</div>'
         })
     }
 }

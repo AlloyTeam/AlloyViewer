@@ -27,7 +27,8 @@ const MARGIN = 40
 class ImageView extends Component {
     static defaultProps = {
         current: 0,
-        disablePageNum: false
+        disablePageNum: false,
+        desc: ''
     }
 
     static propTypes = {
@@ -38,7 +39,9 @@ class ImageView extends Component {
         disableRotate: React.PropTypes.bool,
         disableDoubleTap: React.PropTypes.bool,
         longTap: React.PropTypes.func,
-        close: React.PropTypes.func.isRequired
+        changeIndex: React.PropTypes.func,
+        close: React.PropTypes.func.isRequired,
+        initCallback: React.PropTypes.func
     }
 
     constructor(props) {
@@ -57,6 +60,8 @@ class ImageView extends Component {
     focused = null;
 
     render() {
+        const { desc, disablePageNum, children } = this.props;
+
         return (
             <div className="imageview">
                 <AlloyFinger
@@ -84,8 +89,12 @@ class ImageView extends Component {
                     </ul>
                 </AlloyFinger>
                 {
-                    this.props.disablePageNum ? null : <div className="page">{ this.state.current + 1 } / { this.arrLength }</div>
+                    disablePageNum ? null : <div className="page">{ this.state.current + 1 } / { this.arrLength }</div>
                 }
+                {
+                    desc ? <div dangerouslySetInnerHTML={{__html: desc}}></div> : null
+                }
+                { children }
             </div>
         )
     }
@@ -100,6 +109,8 @@ class ImageView extends Component {
         Transform(this.list);
         current && this.changeIndex(current, false);
         this.ob && Transform(this.ob);
+
+        this.props.initCallback && this.props.initCallback();
     }
 
     onSingleTap(){
@@ -265,6 +276,8 @@ class ImageView extends Component {
     changeIndex(current, ease=true) {
         ease && (this.list.style.webkitTransition = '300ms ease');
         this.list.translateX = -current*(this.screenWidth + MARGIN);
+
+        this.props.changeIndex && this.props.changeIndex(current);
     }
 
     setScale(size) {
