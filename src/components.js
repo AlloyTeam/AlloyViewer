@@ -65,6 +65,12 @@ export class CenterImage extends Component {
 
         let imgStyle = {};
 
+        if(r >= 3.5){
+            // imgStyle.width = width + "px";
+            // imgStyle.height = h * width / w + "px";
+            target.setAttribute('long', true);
+        }
+
         if(r > rate){
             imgStyle.height = height + "px";
             imgStyle.width = w * height / h + "px";

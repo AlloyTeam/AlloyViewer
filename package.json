@@ -1,12 +1,12 @@
 {
   "name": "react-imageview",
-  "version": "1.2.1",
+  "version": "1.3.1",
   "description": "A image viewer built with react",
   "main": "dist/react-imageview.js",
   "scripts": {
     "build": "npm run build:umd & npm run build:umd:min",
     "build:umd": "webpack",
-    "build:umd:min": "NODE_ENV=production webpack",
+    "build:umd:min": "set NODE_ENV=production webpack",
     "dev": "webpack --progress --colors --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublish": "npm run build"
