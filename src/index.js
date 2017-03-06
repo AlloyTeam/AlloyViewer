@@ -293,10 +293,13 @@ class ImageView extends Component {
                 Transform(this.ob)
             }
             // ease hide page number
-            this.refs.page.classList.remove('hide');
-            setTimeout(()=>{
-                this.refs.page.classList.add('hide');
-            }, 2000);
+            const page = this.refs.page;
+            if(page){
+                page.classList.remove('hide');
+                setTimeout(()=>{
+                    page.classList.add('hide');
+                }, 2000);
+            }
         })
     }
 
