@@ -54,6 +54,16 @@ class ImageView extends Component {
         this.state = {
             current: props.current
         }
+        this.onOrientationChange = this.onOrientationChange.bind(this)
+    }
+
+    onOrientationChange(){
+        // 方向改变后新的innerHeight生效需要delay
+        setTimeout(()=>{
+            this.screenWidth = window.innerWidth || window.screen.availWidth;
+            this.screenHeight = window.innerHeight ||  window.screen.availHeight;
+            this.changeIndex(this.state.current)
+        }, 100)
     }
 
     initScale = 1;
@@ -110,7 +120,7 @@ class ImageView extends Component {
 
         this.arrLength = imagelist.length;
         this.list = this.refs['imagelist'];
-        
+
         Transform(this.list);
 
         current && this.changeIndex(current, false);
@@ -118,6 +128,11 @@ class ImageView extends Component {
         this.bindStyle(current);
 
         initCallback && initCallback();
+        window.addEventListener('orientationchange', this.onOrientationChange)
+    }
+
+    componentWillUnmount(){
+        window.removeEventListener('orientationchange', this.onOrientationChange)
     }
 
     onSingleTap(){
