@@ -30,6 +30,10 @@ export class CenterImage extends Component {
         !this.state.loaded && this.loadImg();
     }
 
+    componentWillUnmount(){
+        window.removeEventListener('orientationchange', this.onOrientationChange)
+    }
+
     loadImg() {
         const { index, current, lazysrc } = this.props;
 
@@ -51,7 +55,18 @@ export class CenterImage extends Component {
         }
     }
 
+    onOrientationChange(target){
+        // 方向改变后新的innerHeight生效需要delay
+        setTimeout(()=>{
+            this.onImgLoad({target})
+        }, 100)
+    }
+
     onImgLoad(e) {
+        if(!this.state.loaded) {
+            this.onOrientationChange = this.onOrientationChange.bind(this, e.target)
+            window.addEventListener('orientationchange', this.onOrientationChange)
+        }
 
         this.setState({ loaded: true });
 
