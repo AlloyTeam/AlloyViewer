@@ -82,7 +82,7 @@ class ImageView extends Component {
                     onSingleTap={this.onSingleTap.bind(this)}
                     onPressMove={this.onPressMove.bind(this)}
                     onSwipe={this.onSwipe.bind(this)}>
-                    <ul ref="imagelist" className="imagelist">
+                    <ul ref={(imagelist) => {this.list = imagelist;}} className="imagelist">
                     {
                         this.props.imagelist.map((item, i) => {
                             return (
@@ -119,7 +119,7 @@ class ImageView extends Component {
             { imagelist, initCallback } = this.props;
 
         this.arrLength = imagelist.length;
-        this.list = this.refs['imagelist'];
+        // this.list = this.refs['imagelist'];
 
         Transform(this.list);
 
