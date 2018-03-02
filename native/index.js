@@ -14,132 +14,126 @@
  *  Copyright by nemoliao( liaozksysu@gmail.com), nemo is a member of AlloyTeam in Tencent.
  *
  **********************************************************************************************/
-import React, { Component } from 'react'
-import AlloyFinger from './libs/alloyfinger.js'
-import Transform from './libs/transform.js'
-import { CenterImage } from './components.js'
-import Singleton from 'react-singleton'
-
-import './index.less'
+// const AlloyFinger = require('./libs/alloyfinger.js');
+// const Transform = require('./libs/transform.js');
 
 const MARGIN = 30
 
-class ImageView extends Component {
-    static defaultProps = {
-        gap: MARGIN,
-        current: 0,
-        disablePageNum: false,
-        desc: '',
-        maxScale: 2
+class ImageView {
+    
+    constructor(opt) {
+        this.opt = opt || {};
+        this.imagelist = opt.imagelist;
+        this.arrLength = opt.imagelist.length;
+        this.gap = opt.gap || MARGIN;
+        this.current = opt.current || 0;
+        this.disablePageNum = false;
+        this.desc = '';
+        this.maxScale = 2 || opt.maxScale;
+        this.onOrientationChange = this.onOrientationChange.bind(this);
+        this.close = opt.close;
+        this.initScale = 1;
+        this.screenWidth = window.innerWidth || window.screen.availWidth;
+        this.screenHeight = window.innerHeight || window.screen.availHeight;
+
+        this.container = null;
+        this.list = null;
+        this.ob = null;
+        this.focused = null;
+
+        this.initDOM();
     }
 
-    static propTypes = {
-        gap: React.PropTypes.number,
-        maxScale: React.PropTypes.number,
-        current: React.PropTypes.number,
-        imagelist: React.PropTypes.array.isRequired,
-        disablePageNum: React.PropTypes.bool,
-        disablePinch: React.PropTypes.bool,
-        enableRotate: React.PropTypes.bool,
-        disableDoubleTap: React.PropTypes.bool,
-        longTap: React.PropTypes.func,
-        close: React.PropTypes.func.isRequired,
-        changeIndex: React.PropTypes.func,
-        initCallback: React.PropTypes.func
-    }
+    initDOM() {
+        this.dom = document.createDocumentFragment();
+        this.list = document.createElement('ul');
+        this.list.className = 'imagelist';
 
-    constructor(props) {
-        super();
-        this.arrLength = props.imagelist.length;
-        this.state = {
-            current: props.current
+        new AlloyFinger(this.list, {
+            singleTap: this.onSingleTap.bind(this),
+            pressMove: this.onPressMove.bind(this),
+            swipe: this.onSwipe.bind(this)
+        });
+        this.imagelist.forEach((ele, i) => {
+            let li = document.createElement('li');
+            li.className = 'imagelist-item';
+            li.style.marginRight = this.gap + 'px';
+
+            let centerImg = document.createElement('img');
+            centerImg.id = `view${i}`;
+            centerImg.className = 'imagelist-item-img';
+            centerImg.src = ele;
+            centerImg.onload = this.onImgLoad.bind(this);
+
+            new AlloyFinger(centerImg, {
+                pressMove: this.onPicPressMove.bind(this),
+                multipointStart: this.onMultipointStart.bind(this),
+                longTap: this.onLongTap.bind(this),
+                pinch: this.onPinch.bind(this),
+                rotate: this.onRotate.bind(this),
+                multipointEnd: this.onMultipointEnd.bind(this),
+                doubleTap: this.onDoubleTap.bind(this)
+            });
+
+            li.appendChild(centerImg);
+
+            this.list.appendChild(li);
+        });
+        this.dom.appendChild(this.list);
+
+        // page number
+        if(!this.opt.disablePageNum) {
+            let pageNum = document.createElement('div');
+            pageNum.className = 'page';
+            pageNum.id = 'pageNum';
+            pageNum.innerHTML = `${this.current + 1} / ${this.arrLength}`;
+            this.dom.appendChild(pageNum);
         }
-        this.onOrientationChange = this.onOrientationChange.bind(this)
     }
-
+    
     onOrientationChange(){
         // 方向改变后新的innerHeight生效需要delay
         setTimeout(()=>{
             this.screenWidth = window.innerWidth || window.screen.availWidth;
             this.screenHeight = window.innerHeight ||  window.screen.availHeight;
-            this.changeIndex(this.state.current)
+            this.changeIndex(this.current)
         }, 100)
     }
 
-    initScale = 1;
-    screenWidth = window.innerWidth || window.screen.availWidth;
-    screenHeight = window.innerHeight || window.screen.availHeight;
-    list = null;
-    ob = null;
-    focused = null;
+    show() {
+        if(this.isRendered){
+            this.container.classList.remove('hide');
+            this.container.style.display = 'block';
+        }else {
+            this.container = document.createElement('div');
+            this.container.id = 'imageview';
+            this.container.className = 'imageview';
 
-    render() {
-        const { desc, disablePageNum, children, gap } = this.props;
+            this.container.appendChild(this.dom);
+            document.body.appendChild(this.container);
 
-        return (
-            <div className="imageview">
-                <AlloyFinger
-                    onSingleTap={this.onSingleTap.bind(this)}
-                    onPressMove={this.onPressMove.bind(this)}
-                    onSwipe={this.onSwipe.bind(this)}>
-                    <ul ref={imagelist => {this.list = imagelist;}} className="imagelist">
-                    {
-                        this.props.imagelist.map((item, i) => {
-                            return (
-                                <li className="imagelist-item" style={{ marginRight: gap + 'px'}} key={"img"+i}>
-                                    <AlloyFinger
-                                        onPressMove={this.onPicPressMove.bind(this)}
-                                        onMultipointStart={this.onMultipointStart.bind(this)}
-                                        onLongTap={this.onLongTap.bind(this)}
-                                        onPinch={this.onPinch.bind(this)}
-                                        onRotate={this.onRotate.bind(this)}
-                                        onMultipointEnd={this.onMultipointEnd.bind(this)}
-                                        onDoubleTap={this.onDoubleTap.bind(this)}>
-                                        <CenterImage id={`view${i}`} className="imagelist-item-img" lazysrc={item} index={i} current={this.state.current}/>
-                                    </AlloyFinger>
-                                </li>
-                            )
-                        })
-                    }
-                    </ul>
-                </AlloyFinger>
-                {
-                    disablePageNum ? null : <div className="page" ref="page">{ this.state.current + 1 } / { this.arrLength }</div>
-                }
-                {
-                    desc ? <div dangerouslySetInnerHTML={{__html: desc}}></div> : null
-                }
-                { children }
-            </div>
-        )
+            Transform(this.list);
+            this.current && this.changeIndex(this.current, false);
+            this.bindStyle(this.current);
+            this.opt.initCallback && initCallback();
+
+            this.isRendered = true;
+        }
     }
 
-    componentDidMount() {
-        const { current } = this.state,
-            { imagelist, initCallback } = this.props;
-
-        this.arrLength = imagelist.length;
-
-        Transform(this.list);
-
-        current && this.changeIndex(current, false);
-
-        this.bindStyle(current);
-
-        initCallback && initCallback();
-        window.addEventListener('orientationchange', this.onOrientationChange)
-    }
-
-    componentWillUnmount(){
-        window.removeEventListener('orientationchange', this.onOrientationChange)
+    hide() {
+        this.container.classList.add('hide');
+        setTimeout(() => {
+            this.container.style.display = 'none';
+        }, 500);
     }
 
     onSingleTap(){
-        this.props.close && this.props.close();
+        this.opt.close && this.opt.close();
     }
 
     onPressMove(evt){
-        const { current } = this.state;
+        const { current } = this;
 
         this.endAnimation();
 
@@ -157,19 +151,19 @@ class ImageView extends Component {
     onSwipe(evt){
         const { direction } = evt;
 
-        let { current } = this.state;
+        let c = this.current;
         if( this.focused ){
             return false;
         }
         switch(direction) {
             case 'Left':
-                current < this.arrLength-1 && ++current && this.bindStyle(current);
+                c < this.arrLength-1 && ++c && this.bindStyle(c);
                 break;
             case 'Right':
-                current > 0 && current-- && this.bindStyle(current);
+                c > 0 && c-- && this.bindStyle(c);
                 break;
         }
-        this.changeIndex(current)
+        this.changeIndex(c)
     }
 
     onPicPressMove(evt) {
@@ -201,7 +195,7 @@ class ImageView extends Component {
     }
 
     onPinch(evt){
-        if( this.props.disablePinch || this.ob.getAttribute('long')){
+        if( this.opt.disablePinch || this.ob.getAttribute('long')){
             return false;
         }
         this.ob.style.webkitTransition = 'cubic-bezier(.25,.01,.25,1)'
@@ -219,7 +213,7 @@ class ImageView extends Component {
     }
 
     onRotate(evt){
-        if( !this.props.enableRotate || this.ob.getAttribute('rate') >= 3.5){
+        if( !this.opt.enableRotate || this.ob.getAttribute('rate') >= 3.5){
             return false;
         }
         
@@ -229,12 +223,12 @@ class ImageView extends Component {
     }
 
     onLongTap(){
-        this.props.longTap && this.props.longTap();
+        this.opt.longTap && this.opt.longTap();
     }
 
     onMultipointEnd(evt){
         // translate to normal
-        this.changeIndex(this.state.current);
+        this.changeIndex(this.current);
 
         if(!this.ob){
             return;
@@ -242,7 +236,7 @@ class ImageView extends Component {
 
         this.ob.style.webkitTransition = '300ms ease';
 
-        const { maxScale } = this.props,
+        const { maxScale } = this,
             isLongPic = this.ob.getAttribute('long');
         // scale to normal
         if (this.ob.scaleX < 1) {
@@ -277,7 +271,7 @@ class ImageView extends Component {
     }
 
     onDoubleTap(evt){
-        if( this.props.disableDoubleTap ){
+        if( this.opt.disableDoubleTap ){
             return false;
         }
 
@@ -289,7 +283,7 @@ class ImageView extends Component {
         if(this.ob.scaleX === 1){
             !isLongPic && (this.ob.translateX = this.ob.originX = originX);
             !isLongPic && (this.ob.translateY = this.ob.originY = originY);
-            this.setScale(isLongPic ? this.screenWidth / this.ob.width : this.props.maxScale);
+            this.setScale(isLongPic ? this.screenWidth / this.ob.width : this.maxScale);
         }else{
             this.ob.translateX = this.ob.originX;
             this.ob.translateY = this.ob.originY;
@@ -300,28 +294,30 @@ class ImageView extends Component {
     }
 
     bindStyle(current) {
-        this.setState({ current }, () => {
-            this.ob && this.restore();
-            this.ob = document.getElementById(`view${current}`);
-            if(this.ob && !this.ob.scaleX){ 
-                Transform(this.ob)
-            }
-            // ease hide page number
-            const page = this.refs.page;
-            if(page){
-                page.classList.remove('hide');
-                setTimeout(()=>{
-                    page.classList.add('hide');
-                }, 2000);
-            }
-        })
+        this.current = current;
+        this.ob && this.restore();
+        this.ob = document.getElementById(`view${current}`);
+        if(this.ob && !this.ob.scaleX){ 
+            Transform(this.ob)
+        }
+        // ease hide page number
+        const page = document.getElementById('pageNum');
+        if(page){
+            page.classList.remove('hide');
+            setTimeout(()=>{
+                page.classList.add('hide');
+            }, 2000);
+        }
     }
 
     changeIndex(current, ease=true) {
         ease && (this.list.style.webkitTransition = '300ms ease');
-        this.list.translateX = -current*(this.screenWidth + this.props.gap);
+        this.list.translateX = -current*(this.screenWidth + this.gap);
 
-        this.props.changeIndex && this.props.changeIndex(current);
+        this.opt.changeIndex && this.opt.changeIndex(current);
+
+        // change page number
+        document.getElementById('pageNum').innerHTML = `${this.current + 1} / ${this.arrLength}`;
     }
 
     setScale(size) {
@@ -364,8 +360,36 @@ class ImageView extends Component {
         }
         return false;
     }
+
+    onImgLoad(e) {
+        const target = e.target,
+            h = target.naturalHeight,
+            w = target.naturalWidth,
+            r = h / w,
+            height = window.innerHeight || window.screen.availHeight,
+            width = window.innerWidth || window.screen.availWidth,
+            rate = height / width;
+
+        let imgStyle = {};
+
+        if(r >= 3.5){
+            target.setAttribute('long', true);
+        }
+
+        if(r > rate){
+            imgStyle.height = height + "px";
+            imgStyle.width = w * height / h + "px";
+            imgStyle.left = width / 2 - (w * height / h) / 2 + "px";
+        }else if( r < rate){
+            imgStyle.width = width + "px";
+            imgStyle.height = h * width / w + "px";
+            imgStyle.top = height / 2 - (h * width / w) / 2 + "px"
+        } else {
+            imgStyle.width = width;
+            imgStyle.height = height;
+        }
+
+        target.setAttribute('style', `width:${imgStyle.width}; height:${imgStyle.height}; left:${imgStyle.left}; top:${imgStyle.top};`);
+        target.setAttribute('rate', 1/r);
+    }
 }
-
-export const SingleImgView = new Singleton(ImageView)
-
-export default ImageView
